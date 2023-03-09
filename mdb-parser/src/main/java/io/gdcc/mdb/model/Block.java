@@ -1,6 +1,7 @@
 package io.gdcc.mdb.model;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public final class Block {
@@ -17,8 +18,11 @@ public final class Block {
         this.blockUri = blockUri;
     }
     
+    /**
+     * A builder to create a {@link Block} with all necessary details.
+     * Adding details while require validation to pass on the given values.
+     */
     public static final class Builder {
-
         
         private String name;
         private final Predicate<String> nameValidator = Predicate.not(String::isBlank).and(Validators.BLOCK_NAME);
@@ -48,7 +52,8 @@ public final class Block {
         }
     
         /**
-         * Set a dataverse alias for this new block. Will validate value.
+         * Set a dataverse collection alias for this new block. Will validate value.
+         * This is an optional step, as the alias may be empty.
          * @param dataverseAlias The name of the dataverse collection for which this block is only valid for
          * @return The builder
          * @throws IllegalArgumentException When the name is null or not matching {@link Validators#DV_COLLECTION_ALIAS_PATTERN}
@@ -62,6 +67,12 @@ public final class Block {
             return this;
         }
     
+        /**
+         * Set a display name for this block. Will validate value.
+         * @param displayName The display name
+         * @return The builder
+         * @throws IllegalArgumentException When the display name is null, empty, blank or longer than 256 chars
+         */
         public Builder withDisplayName(String displayName) {
             if (displayName != null && displayNameValidator.test(displayName)) {
                 this.displayName = displayName;
@@ -70,7 +81,13 @@ public final class Block {
             }
             return this;
         }
-        
+    
+        /**
+         * Set a URI for this block. Not necessarily resolvable, but providing a default namespace for the schema
+         * and fields of this block. Will validate value.
+         * @param blockUri The valid URI to use as a namespace
+         * @return The builder
+         */
         public Builder withBlockUri(String blockUri) {
             if (blockUri != null && blockUriValidator.test(blockUri)) {
                 this.blockUri = URI.create(blockUri);
@@ -79,12 +96,22 @@ public final class Block {
             }
             return this;
         }
-        
+    
+        /**
+         * Set a block URI (no validation necessary)
+         * @param blockUri The URI
+         * @return The builder
+         */
         public Builder withBlockUri(URI blockUri) {
             this.blockUri = blockUri;
             return this;
         }
-        
+    
+        /**
+         * Build the {@link Block}. Will only succeed if all details present as necessary.
+         * @return The metadata block
+         * @throws IllegalStateException If some required detail is missing
+         */
         public Block build() {
             if (this.name != null && this.dataverseAlias != null && this.displayName != null && this.blockUri != null) {
                 return new Block(this.name, this.dataverseAlias, this.displayName, this.blockUri);
@@ -95,8 +122,8 @@ public final class Block {
     }
     
     /**
-     * Create a new Block Builder instance with nicer code.
-     * @return A Block Builder
+     * Create a new {@link Block.Builder} instance with nicer to write and read code.
+     * @return A {@link Block.Builder}
      */
     public static Builder create() {
         return new Builder();
@@ -106,8 +133,12 @@ public final class Block {
         return this.name;
     }
     
-    public String getDataverseAlias() {
-        return this.dataverseAlias;
+    public Optional<String> getDataverseAlias() {
+        if (this.dataverseAlias.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(this.dataverseAlias);
+        }
     }
     
     public String getDisplayName() {
