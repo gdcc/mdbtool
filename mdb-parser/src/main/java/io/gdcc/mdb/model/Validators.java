@@ -44,6 +44,18 @@ public class Validators {
         }
     }
     
-    
+    public static boolean getBoolean(String val, String fieldName) {
+        if (val == null) {
+            throw new IllegalArgumentException("Boolean value for " + fieldName + " may not be null");
+        }
+        if ("true".equalsIgnoreCase(val) || "1".equals(val) || "on".equalsIgnoreCase(val)) {
+            return true;
+        }
+        if ("false".equalsIgnoreCase(val) || "0".equals(val) || "off".equalsIgnoreCase(val)) {
+            return false;
+        }
+        throw new IllegalArgumentException("Given value '" + val + "' for " + fieldName +
+            " is not (case-insensitive) within [true|false|0|1|on|off]");
+    }
     
 }
