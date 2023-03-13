@@ -1,9 +1,16 @@
 package io.gdcc.mdb.model;
 
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * This is a model class to hold a metadata block for Dataverse with all the abilities Dataverse can
+ * offer for such blocks and their content. Using this model allows to create parsers for metadata block definitions
+ * and transfer those into some export function or even map to Dataverse internal database model. As such, it is an
+ * abstraction to be used as a middleware.
+ */
 public final class Block {
     
     private final String name;
@@ -11,6 +18,14 @@ public final class Block {
     private final String displayName;
     private final URI blockUri;
     
+    /**
+     * Create a new block. Hidden and only to be used by the builder below.
+     * TODO: add reference to model spec
+     * @param name
+     * @param dataverseAlias
+     * @param displayName
+     * @param blockUri
+     */
     private Block(String name, String dataverseAlias, String displayName, URI blockUri) {
         this.name = name;
         this.dataverseAlias = dataverseAlias;
@@ -129,6 +144,19 @@ public final class Block {
         return new Builder();
     }
     
+    /**
+     * Create a copy of this block as {@link io.gdcc.mdb.model.Block.Builder}, inheriting the values
+     * from this one and ready to be altered.
+     * @return The builder with the cloned block.
+     */
+    public Builder copy() {
+        return create()
+            .withName(this.name)
+            .withDataverseAlias(this.dataverseAlias)
+            .withDisplayName(this.displayName)
+            .withBlockUri(this.blockUri);
+    }
+    
     public String getName() {
         return this.name;
     }
@@ -147,5 +175,18 @@ public final class Block {
     
     public URI getBlockUri() {
         return this.blockUri;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Block)) return false;
+        Block block = (Block) o;
+        return Objects.equals(getName(), block.getName());
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName());
     }
 }
